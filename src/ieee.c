@@ -136,18 +136,21 @@ static void crename(uint8_t *f);
 
 // Functions
 
+// MGK: The ROM function only supports reading to VERA or the first 64k.  
+//      I'm not sure I can solve this in the current emulator with the current ROM
+
 static void
 set_kernal_cbdos_flags(uint8_t flags)
 {
 	if (cbdos_flags)
-		write6502(cbdos_flags, flags);
+		write65816(0x00, cbdos_flags, flags);
 }
 
 static uint8_t
 get_kernal_cbdos_flags(void)
 {
 	if (cbdos_flags) {
-		return read6502(cbdos_flags);
+		return read65816(0x00, cbdos_flags);
 	} else {
 		return 0;
 	}
@@ -1996,26 +1999,27 @@ TALK(uint8_t a)
 	return ret;
 }
 
+// MGK: Pay attention to regs.db and only do $a000 wrap around if regs.db == 0
 int
 MACPTR(uint16_t addr, uint16_t *c, uint8_t stream_mode)
 {
 	if (talking) {
 		int ret = 0;
 		int count = *c ?: 256;
-		uint8_t ram_bank = read6502(0);
+		uint8_t ram_bank = read65816(0x00, 0);
 		int i = 0;
 		if (channels[channel].f) {
 			do {
 				uint8_t byte = 0;
 				ret = ACPTR(&byte);
-				write6502(addr, byte);
+				write65816(0x00, addr, byte);
 				i++;
 				if (!stream_mode) {
 					addr++;
 					if (addr == 0xc000) {
 						addr = 0xa000;
 						ram_bank++;
-						write6502(0, ram_bank);
+						write65816(0x00, 0, ram_bank);
 					}
 				}
 				if (ret > 0) {
@@ -2032,25 +2036,26 @@ MACPTR(uint16_t addr, uint16_t *c, uint8_t stream_mode)
 	}
 }
 
+// MGK: Pay attention to regs.db and only do $a000 wrap around if regs.db == 0
 int
 MCIOUT(uint16_t addr, uint16_t *c, uint8_t stream_mode)
 {
 	if (listening) {
 		int ret = 0;
 		int count = *c ?: 256;
-		uint8_t ram_bank = read6502(0);
+		uint8_t ram_bank = read65816(0x00, 0);
 		int i = 0;
 		if (channels[channel].f && channels[channel].write) {
 			do {
 				uint8_t byte;
-				byte = read6502(addr);
+				byte = read65816(0x00, addr);
 				i++;
 				if (!stream_mode) {
 					addr++;
 					if (addr == 0xc000) {
 						addr = 0xa000;
 						ram_bank++;
-						write6502(0, ram_bank);
+						write65816(0x00, 0, ram_bank);
 					}
 				}
 				ret = CIOUT(byte);

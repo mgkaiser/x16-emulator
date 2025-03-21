@@ -29,3 +29,5 @@ makecart.js
 makecart.wasm
 makecart.worker.js
 test*.bin
+src_copy/
+testbench/__pycache__/

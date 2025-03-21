@@ -132,6 +132,10 @@ class X16TestBench:
         self.__writeline("STM " + self.__tohex16(address) + " " + self.__tohex8(value))
         self.waitReady()
 
+    def setMemoryL(self, bank, address, value):
+        self.__writeline("STL " + self.__tohex8(bank) + self.__tohex16(address) + " " + self.__tohex8(value))
+        self.waitReady()
+
     def fillMemory(self, address1, address2, value):
         self.__writeline("FLM " + self.__tohex16(address1) + " " + self.__tohex16(address2) + " " + self.__tohex8(value))
         self.waitReady()
@@ -163,10 +167,18 @@ class X16TestBench:
     def getMemory(self, address):
         self.__writeline("RQM " + self.__tohex16(address))
         return self.__toint8(self.__getresponse())
+    
+    def getMemoryL(self, bank, address):
+        self.__writeline("RQL " + self.__tohex8(bank) + self.__tohex16(address))
+        return self.__toint8(self.__getresponse())
 
     def getA(self):
         self.__writeline("RQA")
         return self.__toint8(self.__getresponse())
+    
+    def getA_long(self):
+        self.__writeline("RAL")
+        return self.__toint16(self.__getresponse())
 
     def getX(self):
         self.__writeline("RQX")
